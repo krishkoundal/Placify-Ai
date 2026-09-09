@@ -80,6 +80,10 @@ export const useAuth = () => {
     setUser(null);
   };
 
+  const clearError = () => {
+    setError(null);
+  };
+
   return {
     user,
     loading,
@@ -87,7 +91,8 @@ export const useAuth = () => {
     login,
     register,
     logout,
-    setUser
+    setUser,
+    clearError
   };
 };
 export type AuthContextType = ReturnType<typeof useAuth>;

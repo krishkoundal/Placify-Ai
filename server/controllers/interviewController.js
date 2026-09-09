@@ -53,14 +53,22 @@ const submitAnswer = async (req, res) => {
     currentQuestion.userAnswer = answer;
 
     // Fast local evaluation of the individual answer to adapt difficulty
-    const answerWords = answer.trim().split(/\s+/).length;
-    let localScore = 5; // Default average
-    if (answerWords > 15) localScore += 2;
-    if (answer.toLowerCase().includes('database') || answer.toLowerCase().includes('index') || answer.toLowerCase().includes('security') || answer.toLowerCase().includes('complexity')) {
-      localScore += 2;
+    const cleanText = answer.replace(/\/\/.*/g, '').replace(/Code \([a-z]+\):/gi, '').replace(/Notes:/gi, '').trim();
+    const answerWords = cleanText.length > 0 ? cleanText.split(/\s+/).filter(Boolean).length : 0;
+    
+    let localScore = 0;
+    if (answerWords === 0) {
+      localScore = 0;
+      currentQuestion.aiFeedback = 'Question skipped or left blank (0 points).';
+    } else {
+      if (answerWords > 5) localScore += 3;
+      if (answerWords > 25) localScore += 3;
+      if (cleanText.toLowerCase().includes('database') || cleanText.toLowerCase().includes('index') || cleanText.toLowerCase().includes('security') || cleanText.toLowerCase().includes('complexity') || cleanText.toLowerCase().includes('map')) {
+        localScore += 4;
+      }
+      currentQuestion.aiFeedback = localScore >= 7 ? 'Excellent detail and keyword usage.' : 'Good attempt, but could benefit from deeper technical detail.';
     }
     currentQuestion.score = Math.min(10, localScore);
-    currentQuestion.aiFeedback = currentQuestion.score > 7 ? 'Excellent detail and keyword usage.' : 'Good attempt, but could benefit from deeper technical detail.';
 
     // Check if we reached 4 questions (Standard session duration)
     if (interview.questions.length >= 4) {

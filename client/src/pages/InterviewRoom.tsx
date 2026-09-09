@@ -15,7 +15,8 @@ const InterviewRoom: React.FC = () => {
   const [interview, setInterview] = useState<any>(null);
   const [currentQuestion, setCurrentQuestion] = useState('');
   const [userAnswer, setUserAnswer] = useState('');
-  const [codeContent, setCodeContent] = useState('// Write your solution here\nfunction solve(nums, target) {\n  const map = new Map();\n  for (let i = 0; i < nums.length; i++) {\n    const diff = target - nums[i];\n    if (map.has(diff)) return [map.get(diff), i];\n    map.set(nums[i], i);\n  }\n  return [];\n}');
+  const [initialStub, setInitialStub] = useState('');
+  const [codeContent, setCodeContent] = useState('// Write your solution here\nfunction solve(input) {\n  // TODO: Implement solution\n  return null;\n}');
   const [language, setLanguage] = useState('javascript');
   const [timer, setTimer] = useState(0);
   const [executionOutput, setExecutionOutput] = useState<string | null>(null);
@@ -46,6 +47,63 @@ const InterviewRoom: React.FC = () => {
     } catch (err: any) {
       setExecutionOutput(`Syntax/Runtime Error:\n${err.message}`);
     }
+  };  const getLanguageStub = (questionText: string, lang: string) => {
+    let funcName = 'solve';
+    let params = 'input';
+    let returnVal = 'null';
+    let pyReturn = 'None';
+    let cppReturn = '{}';
+
+    if (questionText.includes('Find First & Last Position')) { funcName = 'searchRange'; params = 'nums, target'; returnVal = '[-1, -1]'; pyReturn = '[-1, -1]'; }
+    else if (questionText.includes('Word Search')) { funcName = 'exist'; params = 'board, word'; returnVal = 'false'; pyReturn = 'False'; }
+    else if (questionText.includes('Course Schedule')) { funcName = 'findOrder'; params = 'numCourses, prerequisites'; returnVal = '[]'; pyReturn = '[]'; }
+    else if (questionText.includes('Merge K Sorted Lists')) { funcName = 'mergeKLists'; params = 'lists'; returnVal = 'null'; pyReturn = 'None'; }
+    else if (questionText.includes('Rotate Image')) { funcName = 'rotate'; params = 'matrix'; returnVal = 'void'; pyReturn = 'None'; }
+    else if (questionText.includes('LRU Cache')) { funcName = 'LRUCache'; params = 'capacity'; returnVal = 'this'; pyReturn = 'self'; }
+    else if (questionText.includes('Top K Frequent')) { funcName = 'topKFrequent'; params = 'nums, k'; returnVal = '[]'; pyReturn = '[]'; }
+    else if (questionText.includes('Subarray Sum Equals K')) { funcName = 'subarraySum'; params = 'nums, k'; returnVal = '0'; pyReturn = '0'; }
+    else if (questionText.includes('Token Bucket')) { funcName = 'rateLimiter'; params = 'timestamps, limit'; returnVal = '[]'; pyReturn = '[]'; }
+    else if (questionText.includes('Buy & Sell Stock')) { funcName = 'maxProfit'; params = 'prices'; returnVal = '0'; pyReturn = '0'; }
+    else if (questionText.includes('Rotate Array')) { funcName = 'rotateArray'; params = 'nums, k'; returnVal = '[]'; pyReturn = '[]'; }
+    else if (questionText.includes('Two Sum')) { funcName = 'twoSum'; params = 'nums, target'; returnVal = '[]'; pyReturn = '[]'; }
+    else if (questionText.includes('Valid Parentheses')) { funcName = 'isValid'; params = 's'; returnVal = 'false'; pyReturn = 'False'; }
+    else if (questionText.includes('Sliding Window')) { funcName = 'minSubArrayLen'; params = 'target, nums'; returnVal = '0'; pyReturn = '0'; }
+    else if (questionText.includes('Trapping Rain Water')) { funcName = 'trap'; params = 'height'; returnVal = '0'; pyReturn = '0'; }
+
+    switch (lang) {
+      case 'python':
+        return `# Problem: ${funcName}\ndef ${funcName}(${params}):\n    # TODO: Implement solution for this problem\n    return ${pyReturn}`;
+
+      case 'java':
+        return `// Problem: ${funcName}\nclass Solution {\n    public Object ${funcName}(${params.includes('nums') ? 'int[] nums' : 'Object input'}) {\n        // TODO: Implement solution for this problem\n        return ${returnVal === 'false' ? 'false' : returnVal === '0' ? '0' : 'null'};\n    }\n}`;
+
+      case 'cpp':
+        return `// Problem: ${funcName}\nclass Solution {\npublic:\n    auto ${funcName}(${params.includes('nums') ? 'vector<int>& nums' : 'auto input'}) {\n        // TODO: Implement solution for this problem\n        return ${cppReturn};\n    }\n};`;
+
+      case 'csharp':
+        return `// Problem: ${funcName}\npublic class Solution {\n    public object ${funcName}(object input) {\n        // TODO: Implement solution\n        return null;\n    }\n}`;
+
+      case 'go':
+        return `// Problem: ${funcName}\npackage main\n\nfunc ${funcName}(${params} interface{}) interface{} {\n    // TODO: Implement solution\n    return nil\n}`;
+
+      case 'rust':
+        return `// Problem: ${funcName}\nimpl Solution {\n    pub fn ${funcName}(${params}: &str) {\n        // TODO: Implement solution\n    }\n}`;
+
+      case 'c':
+        return `// Problem: ${funcName}\nvoid* ${funcName}(void* input) {\n    // TODO: Implement solution\n    return NULL;\n}`;
+
+      case 'typescript':
+        return `// Problem: ${funcName}\nfunction ${funcName}(${params}: any): any {\n  // TODO: Implement solution\n  return ${returnVal};\n}`;
+
+      case 'sql':
+        return `-- Write your SQL query for this question\nSELECT * FROM data_table;`;
+
+      case 'shell':
+        return `#!/bin/bash\n# Write your script for ${funcName}\necho "Processing..."`;
+
+      default: // javascript
+        return `// Problem: ${funcName}\nfunction ${funcName}(${params}) {\n  // TODO: Implement optimal solution here\n  return ${returnVal};\n}`;
+    }
   };
 
   useEffect(() => {
@@ -57,6 +115,14 @@ const InterviewRoom: React.FC = () => {
     }
     return () => clearInterval(interval);
   }, [started, evaluation]);
+
+  useEffect(() => {
+    if (type === 'Coding' && currentQuestion) {
+      const stub = getLanguageStub(currentQuestion, language);
+      setInitialStub(stub);
+      setCodeContent(stub);
+    }
+  }, [currentQuestion, type, language]);
 
   const handleStart = async () => {
     setLoading(true);
@@ -77,7 +143,22 @@ const InterviewRoom: React.FC = () => {
   const handleSubmitAnswer = async () => {
     if (loading) return;
     setLoading(true);
-    const finalAnswer = type === 'Coding' ? `Code submitted in ${language}:\n${codeContent}\nNotes: ${userAnswer}` : userAnswer;
+
+    let finalAnswer = '';
+    if (type === 'Coding') {
+      const hasNote = userAnswer.trim().length > 0;
+      // Check if candidate actually edited code beyond the initial stub template
+      const isCodeEdited = codeContent.trim() !== initialStub.trim();
+      const cleanCode = codeContent.replace(/\/\/.*/g, '').trim();
+
+      if (!hasNote && (!isCodeEdited || cleanCode.length === 0)) {
+        finalAnswer = '';
+      } else {
+        finalAnswer = `${isCodeEdited ? `Code (${language}):\n${codeContent}\n` : ''}${hasNote ? `Notes: ${userAnswer.trim()}` : ''}`.trim();
+      }
+    } else {
+      finalAnswer = userAnswer.trim();
+    }
 
     try {
       const res = await api.post('/interview/answer', {
@@ -151,12 +232,68 @@ const InterviewRoom: React.FC = () => {
               <select 
                 value={company} 
                 onChange={(e) => setCompany(e.target.value)}
-                className="w-full bg-slate-950 border border-slate-800 focus:border-indigo-500 rounded-lg px-4 py-2.5 text-sm text-slate-200 outline-none"
+                className="w-full bg-slate-950 border border-slate-800 focus:border-indigo-500 rounded-lg px-4 py-2.5 text-sm text-slate-200 outline-none max-h-60"
               >
-                <option value="Google">Google (DSA Focus)</option>
-                <option value="Amazon">Amazon (Leadership Principles)</option>
-                <option value="Razorpay">Razorpay (Backend Architecture)</option>
-                <option value="CRED">CRED (JS Performance)</option>
+                <optgroup label="FAANG & US Tech Giants">
+                  <option value="Google">Google (DSA Focus & Graphs/DP)</option>
+                  <option value="Microsoft">Microsoft (Problem Solving & System Design)</option>
+                  <option value="Amazon">Amazon (Leadership Principles & Scalability)</option>
+                  <option value="Meta">Meta (Speed Coding & Dynamic Programming)</option>
+                  <option value="Apple">Apple (Low-Level Design & Core OS)</option>
+                  <option value="Netflix">Netflix (High Concurrency & System Architecture)</option>
+                  <option value="Nvidia">Nvidia (CUDA, C++ & Parallel Systems)</option>
+                  <option value="Uber">Uber (Distributed Systems & Geospatial DSA)</option>
+                  <option value="Adobe">Adobe (Algorithms, Graphics & C++)</option>
+                  <option value="Atlassian">Atlassian (Code Quality & System Design)</option>
+                  <option value="Salesforce">Salesforce (Cloud Architecture & Enterprise Scale)</option>
+                  <option value="Airbnb">Airbnb (Full-Stack Architecture & System Design)</option>
+                  <option value="Stripe">Stripe (API Architecture & Financial Systems)</option>
+                  <option value="Vercel">Vercel (React, Next.js & Edge Performance)</option>
+                </optgroup>
+                <optgroup label="Top Indian Product Companies & Unicorns">
+                  <option value="Razorpay">Razorpay (Backend Architecture & Payment Gateways)</option>
+                  <option value="CRED">CRED (JS Performance & High Scale Microservices)</option>
+                  <option value="Flipkart">Flipkart (E-commerce Concurrency & Supply Chain DSA)</option>
+                  <option value="Zomato">Zomato (Real-time Tracking & Microservices)</option>
+                  <option value="Swiggy">Swiggy (Location Engines & Backend Scale)</option>
+                  <option value="Paytm">Paytm (High Volume Transactions & Security)</option>
+                  <option value="Ola">Ola (Distributed Fleet & Real-time Routing)</option>
+                  <option value="PhonePe">PhonePe (UPI Infrastructure & High Throughput)</option>
+                  <option value="Meesho">Meesho (Social Commerce & Search Ranking)</option>
+                  <option value="Zepto">Zepto (Ultra-Fast Logistics & Inventory Optimization)</option>
+                  <option value="Blinkit">Blinkit (Quick-Commerce Routing & Fulfilment)</option>
+                  <option value="Urban Company">Urban Company (Matchmaking Algorithms & Service Ops)</option>
+                  <option value="Groww">Groww (Stock Trading Engine & Low-Latency Feeds)</option>
+                  <option value="Zerodha">Zerodha (Low-Latency Trading Engines & Go/Python)</option>
+                  <option value="Postman">Postman (API Ecosystems & Node.js Internals)</option>
+                  <option value="Freshworks">Freshworks (SaaS Multi-tenancy & Ruby/Node)</option>
+                  <option value="Zoho">Zoho (Custom Engine Frameworks & Database Internals)</option>
+                  <option value="MakeMyTrip">MakeMyTrip (Search Engines & Distributed Caching)</option>
+                  <option value="InMobi">InMobi (AdTech Systems & Big Data Pipelines)</option>
+                </optgroup>
+                <optgroup label="Finance, Quant & Investment Banking">
+                  <option value="Goldman Sachs">Goldman Sachs (Financial Mathematics & Quant DSA)</option>
+                  <option value="JPMorgan Chase">JPMorgan Chase (Enterprise Java & Microservices)</option>
+                  <option value="Morgan Stanley">Morgan Stanley (Low-Latency C++ & Multi-threading)</option>
+                  <option value="DE Shaw">DE Shaw (Advanced Algorithms & Quant Logic)</option>
+                  <option value="Tower Research">Tower Research (Ultra Low-Latency C++ & HFT Architecture)</option>
+                </optgroup>
+                <optgroup label="Global Enterprise & Systems Tech">
+                  <option value="Oracle">Oracle (Database Engine Internals & Cloud Infra)</option>
+                  <option value="Cisco">Cisco (Networking Protocols & Socket Programming)</option>
+                  <option value="IBM">IBM (Enterprise Hybrid Cloud & AI Infrastructure)</option>
+                  <option value="Intel">Intel (Computer Architecture & Embedded Systems)</option>
+                  <option value="Qualcomm">Qualcomm (Wireless Protocols & DSP Systems)</option>
+                  <option value="Samsung">Samsung (Mobile Kernel & Memory Management)</option>
+                </optgroup>
+                <optgroup label="IT Services & Consulting Leaders">
+                  <option value="TCS">TCS (TCS NQT / Digital Advanced Coding)</option>
+                  <option value="Infosys">Infosys (HackWithInfy / Specialist Programmer)</option>
+                  <option value="Wipro">Wipro (Turbo Technical & System Coding)</option>
+                  <option value="Cognizant">Cognizant (GenC Next & Complex Problem Solving)</option>
+                  <option value="Accenture">Accenture (Advanced Engineering & Cloud Solutions)</option>
+                  <option value="Capgemini">Capgemini (Pseudocode & Systems Analysis)</option>
+                </optgroup>
               </select>
             </div>
 
@@ -185,10 +322,26 @@ const InterviewRoom: React.FC = () => {
                 </span>
               </div>
 
-              <div className="bg-slate-950 p-6 rounded-xl border border-slate-800/80 glowing-primary">
-                <p className="text-sm font-medium text-slate-200 leading-relaxed">
-                  {currentQuestion}
-                </p>
+              <div className="bg-slate-950 p-6 rounded-xl border border-slate-800/80 glowing-primary overflow-y-auto max-h-[45vh] space-y-4">
+                {currentQuestion.split('\n\nSample Test Cases:').map((part, idx) => {
+                  if (idx === 0) {
+                    return (
+                      <p key={idx} className="text-sm font-medium text-slate-200 leading-relaxed whitespace-pre-line">
+                        {part}
+                      </p>
+                    );
+                  }
+                  return (
+                    <div key={idx} className="mt-4 pt-4 border-t border-slate-800/80 space-y-2">
+                      <span className="text-xs font-bold text-emerald-400 uppercase tracking-wider flex items-center space-x-1.5">
+                        <span>🧪 Sample Test Cases</span>
+                      </span>
+                      <div className="bg-slate-900/90 border border-slate-800 rounded-lg p-3.5 font-mono text-xs text-emerald-300/90 whitespace-pre-line leading-relaxed shadow-inner">
+                        {part.trim()}
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             </div>
 
@@ -239,12 +392,33 @@ const InterviewRoom: React.FC = () => {
                     <select 
                       value={language}
                       onChange={(e) => setLanguage(e.target.value)}
-                      className="bg-slate-900 border border-slate-800 text-xs text-slate-300 rounded px-2.5 py-1 outline-none"
+                      className="bg-slate-900 border border-slate-800 text-xs text-slate-300 rounded px-2.5 py-1 outline-none font-medium cursor-pointer"
                     >
-                      <option value="javascript">JavaScript</option>
-                      <option value="typescript">TypeScript</option>
-                      <option value="python">Python</option>
-                      <option value="cpp">C++</option>
+                      <optgroup label="Popular Languages">
+                        <option value="javascript">JavaScript (Node.js)</option>
+                        <option value="python">Python 3</option>
+                        <option value="java">Java (OpenJDK)</option>
+                        <option value="cpp">C++ (GCC)</option>
+                        <option value="typescript">TypeScript</option>
+                      </optgroup>
+                      <optgroup label="Systems & Enterprise">
+                        <option value="c">C (GCC)</option>
+                        <option value="csharp">C# (.NET)</option>
+                        <option value="go">Go (Golang)</option>
+                        <option value="rust">Rust</option>
+                      </optgroup>
+                      <optgroup label="Mobile & Modern Web">
+                        <option value="kotlin">Kotlin</option>
+                        <option value="swift">Swift</option>
+                        <option value="dart">Dart (Flutter)</option>
+                        <option value="php">PHP</option>
+                        <option value="ruby">Ruby</option>
+                      </optgroup>
+                      <optgroup label="Data, Logic & Scripting">
+                        <option value="sql">SQL (PostgreSQL/MySQL)</option>
+                        <option value="scala">Scala</option>
+                        <option value="shell">Bash / Shell Script</option>
+                      </optgroup>
                     </select>
                     <button 
                       onClick={handleRunCode}

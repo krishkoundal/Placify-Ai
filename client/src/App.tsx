@@ -14,7 +14,7 @@ import PlacementPredictor from './pages/PlacementPredictor';
 import PublicShowcase from './pages/PublicShowcase';
 
 const App: React.FC = () => {
-  const { user, loading, error, login, register, logout } = useAuth();
+  const { user, loading, error, login, register, logout, clearError } = useAuth();
 
   return (
     <BrowserRouter>
@@ -29,7 +29,8 @@ const App: React.FC = () => {
               <LandingPage 
                 onLogin={login} 
                 onRegister={register} 
-                authError={error} 
+                authError={error}
+                onClearError={clearError}
               />
             )
           } 

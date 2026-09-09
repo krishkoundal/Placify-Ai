@@ -17,9 +17,10 @@ interface LandingPageProps {
   onLogin: (email: string, password: string) => Promise<boolean>;
   onRegister: (name: string, email: string, password: string) => Promise<boolean>;
   authError: string | null;
+  onClearError?: () => void;
 }
 
-const LandingPage: React.FC<LandingPageProps> = ({ onLogin, onRegister, authError }) => {
+const LandingPage: React.FC<LandingPageProps> = ({ onLogin, onRegister, authError, onClearError }) => {
   const navigate = useNavigate();
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [isSignUp, setIsSignUp] = useState(false);
@@ -27,15 +28,44 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLogin, onRegister, authErro
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
   const [loading, setLoading] = useState(false);
+  const [validationError, setValidationError] = useState<string | null>(null);
+
+  const openModal = (signUpMode: boolean) => {
+    setIsSignUp(signUpMode);
+    setShowAuthModal(true);
+    setValidationError(null);
+    if (onClearError) onClearError();
+  };
+
+  const toggleSignUpMode = (signUpMode: boolean) => {
+    setIsSignUp(signUpMode);
+    setValidationError(null);
+    if (onClearError) onClearError();
+  };
 
   const handleAuthSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setValidationError(null);
+
+    if (isSignUp && !name.trim()) {
+      setValidationError('Please enter your full name');
+      return;
+    }
+    if (!email.trim()) {
+      setValidationError('Please enter your email address');
+      return;
+    }
+    if (password.length < 6) {
+      setValidationError('Password must be at least 6 characters');
+      return;
+    }
+
     setLoading(true);
     let success = false;
     if (isSignUp) {
-      success = await onRegister(name, email, password);
+      success = await onRegister(name.trim(), email.trim(), password);
     } else {
-      success = await onLogin(email, password);
+      success = await onLogin(email.trim(), password);
     }
     setLoading(false);
     if (success) {
@@ -62,7 +92,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLogin, onRegister, authErro
           <h1 className="text-xl font-bold tracking-tight text-white">Placify AI</h1>
         </div>
         <button 
-          onClick={() => { setIsSignUp(false); setShowAuthModal(true); }}
+          onClick={() => openModal(false)}
           className="px-5 py-2 rounded-full text-sm font-semibold bg-indigo-600 hover:bg-indigo-500 text-white transition-all shadow-md hover:scale-[1.02]"
         >
           Access Career OS
@@ -93,13 +123,13 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLogin, onRegister, authErro
 
         <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
           <button 
-            onClick={() => { setIsSignUp(true); setShowAuthModal(true); }}
+            onClick={() => openModal(true)}
             className="w-full sm:w-auto px-8 py-4 rounded-xl text-base font-bold bg-white text-slate-950 hover:bg-slate-100 hover:scale-[1.02] transition-all shadow-xl"
           >
             Start Free Now
           </button>
           <button 
-            onClick={() => { setIsSignUp(false); setShowAuthModal(true); }}
+            onClick={() => openModal(false)}
             className="w-full sm:w-auto px-8 py-4 rounded-xl text-base font-bold bg-slate-900 border border-slate-800 hover:bg-slate-800 text-slate-200 transition-all"
           >
             Watch Demo Platform
@@ -166,10 +196,10 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLogin, onRegister, authErro
             <h3 className="text-xl font-bold text-white mb-2">{isSignUp ? 'Create your Placify OS' : 'Access your Career OS'}</h3>
             <p className="text-xs text-slate-400 mb-6">Enter details below to synchronize your coding stats</p>
 
-            {authError && (
+            {(validationError || authError) && (
               <div className="bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs p-3 rounded-lg flex items-center space-x-2 mb-4">
-                <AlertCircle className="w-4 h-4" />
-                <span>{authError}</span>
+                <AlertCircle className="w-4 h-4 shrink-0" />
+                <span>{validationError || authError}</span>
               </div>
             )}
 
@@ -213,7 +243,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLogin, onRegister, authErro
               <button 
                 type="submit"
                 disabled={loading}
-                className="w-full mt-4 bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2.5 rounded-lg text-sm shadow-md transition-all flex items-center justify-center space-x-2"
+                className="w-full mt-4 bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2.5 rounded-lg text-sm shadow-md transition-all flex items-center justify-center space-x-2 disabled:opacity-50"
               >
                 {loading ? (
                   <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
@@ -229,7 +259,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLogin, onRegister, authErro
                 <p>
                   Already have an account?{' '}
                   <span 
-                    onClick={() => setIsSignUp(false)} 
+                    onClick={() => toggleSignUpMode(false)} 
                     className="text-indigo-400 hover:underline cursor-pointer font-semibold"
                   >
                     Login here
@@ -239,7 +269,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLogin, onRegister, authErro
                 <p>
                   New to Placify AI?{' '}
                   <span 
-                    onClick={() => setIsSignUp(true)} 
+                    onClick={() => toggleSignUpMode(true)} 
                     className="text-indigo-400 hover:underline cursor-pointer font-semibold"
                   >
                     Create account
