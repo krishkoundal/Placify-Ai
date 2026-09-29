@@ -64,7 +64,7 @@ const PlacementPredictor: React.FC = () => {
     fetchPredictions();
   }, []);
 
-  const handleSimulate = (dsa = dsaGoal, ats = atsGoal, proj = projectGoal) => {
+  const handleSimulate = (dsa: number = dsaGoal, ats: number = atsGoal, proj: number = projectGoal) => {
     const dsaScore = Math.min(dsa / 400, 1) * 40;
     const atsScore = (ats / 100) * 35;
     const projectScore = (proj / 5) * 25;
@@ -303,7 +303,7 @@ const PlacementPredictor: React.FC = () => {
               </div>
 
               <button 
-                onClick={handleSimulate}
+                onClick={() => handleSimulate()}
                 className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2.5 rounded-xl text-xs shadow-md transition-all flex items-center justify-center space-x-2 cursor-pointer"
               >
                 <span>Recalculate Impact</span>

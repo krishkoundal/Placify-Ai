@@ -12,6 +12,12 @@ interface HeaderProps {
 const Header: React.FC<HeaderProps> = ({ user, toggleSidebar, sidebarCollapsed }) => {
   const [notifications, setNotifications] = useState<any[]>([]);
   const [showDropdown, setShowDropdown] = useState(false);
+  const [imageError, setImageError] = useState(false);
+
+  const getInitials = (name?: string) => {
+    if (!name) return 'U';
+    return name.substring(0, 2).toUpperCase();
+  };
 
   const getGreeting = () => {
     const hrs = new Date().getHours();
@@ -164,11 +170,18 @@ const Header: React.FC<HeaderProps> = ({ user, toggleSidebar, sidebarCollapsed }
         </div>
 
         {/* Profile Avatar */}
-        <img 
-          src={avatarUrl} 
-          alt="Avatar" 
-          className="w-8 h-8 rounded-full border-2 border-indigo-600 bg-slate-800"
-        />
+        {imageError ? (
+          <div className="w-8 h-8 rounded-full border-2 border-indigo-600 bg-indigo-500/20 text-indigo-300 flex items-center justify-center text-xs font-bold shrink-0">
+            {getInitials(user?.name)}
+          </div>
+        ) : (
+          <img 
+            src={avatarUrl} 
+            alt="Avatar" 
+            className="w-8 h-8 rounded-full border-2 border-indigo-600 bg-slate-800 object-cover shrink-0"
+            onError={() => setImageError(true)}
+          />
+        )}
       </div>
     </header>
   );
