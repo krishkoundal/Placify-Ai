@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Github, Code2, Check, RefreshCw, BarChart2, Folder, Star, ExternalLink } from 'lucide-react';
+import { GitBranch, Code2, Check, RefreshCw, BarChart2, Folder, Star, ExternalLink } from 'lucide-react';
 import api from '../services/api';
 
 const GithubLeetcode: React.FC = () => {
@@ -91,7 +91,7 @@ const GithubLeetcode: React.FC = () => {
         {/* Left Card: Github connect */}
         <div className="bg-slate-900 border border-slate-800 p-8 rounded-2xl space-y-6">
           <h3 className="text-lg font-bold text-white flex items-center space-x-2.5">
-            <Github className="w-5 h-5 text-indigo-400" />
+            <GitBranch className="w-5 h-5 text-indigo-400" />
             <span>GitHub Sync Engine</span>
           </h3>
 

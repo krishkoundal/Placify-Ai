@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
-import { ShieldCheck, Award, Github, Code, CheckCircle, HelpCircle } from 'lucide-react';
+import { ShieldCheck, Award, GitBranch, Code, CheckCircle, HelpCircle } from 'lucide-react';
 
 const PublicShowcase: React.FC = () => {
   const { userId } = useParams<{ userId: string }>();
@@ -97,7 +97,7 @@ const PublicShowcase: React.FC = () => {
           
           <div className="flex items-center justify-between text-xs">
             <div className="flex items-center space-x-2 text-slate-300">
-              <Github className="w-4 h-4 text-slate-400" />
+              <GitBranch className="w-4 h-4 text-slate-400" />
               <span>GitHub Status</span>
             </div>
             {data.github ? (
