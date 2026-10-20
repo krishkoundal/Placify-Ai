@@ -1,8 +1,8 @@
 import axios from 'axios';
 
-// Create central API instance pointing to local node server or relative proxies
+// Create central API instance — uses VITE_API_URL env var or falls back to production
 const api = axios.create({
-  baseURL: 'http://localhost:5000/api',
+  baseURL: import.meta.env.VITE_API_URL || 'https://placify-ai-vcbq.onrender.com/api',
   headers: {
     'Content-Type': 'application/json'
   }

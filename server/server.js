@@ -9,7 +9,14 @@ const connectDB = async () => {
 const app = express();
 
 // Middlewares
-app.use(cors());
+app.use(cors({
+  origin: [
+    'https://placify-ai-8cfc.vercel.app',  // Production frontend
+    'http://localhost:5173',                // Local dev
+    'http://localhost:3000'                 // Local dev alt
+  ],
+  credentials: true
+}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
